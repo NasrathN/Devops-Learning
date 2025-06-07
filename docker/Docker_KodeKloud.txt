@@ -1,0 +1,63 @@
+Basic Docker commands :
+
+> docker run nginx ( runs instance of nginx image . It will first check in local if the image is there or not else it will pull from repository)
+
+> docker ps (lists all running containers)
+
+> docker ps -a (lists all running / non-running comntainers)
+
+> docker stop nginx (to stop running container)
+
+> docker rm (to completely remove the stop or exited container)
+
+> docker images (lists all images)
+
+> docker rmi nginx (to remove image)
+
+> docker pull nginx ( just pull image and not run container)
+
+> docker run kodekloud/simple-webapp (runs the web app in attached mode , you can see the outpur on the console . If you close console , app stopd running)
+
+> docker run -d kodekloud/simple-webapp (runs the web app in detached mode)
+
+> docker attach a043d ( if you want the app to attach back again , mention the first few characters of the app id)
+
+> docker exec <container-id> cat /etc/*release* (you can execute a command on the container . Here the image was centos . If you dont run any command on such iamges , container will
+stop because centos is not a service that can keep running . You have to keep it alive -- either by adding sleep command or exec any command directly)
+
+> docker run -it kodekoud/aimple-app ( here -i means running with interactive mode and -t means running on terminal - basically to get user prompts)
+
+> docker inspect <container-name> ( to get details of the container )
+
+> docker logs <container-name or container-id> (to read the logs of the running container)
+
+> docker run -p 38282:8080 mywebapp:tag1 (map the ports)
+38382 is docker host ports
+8080 is container port
+===========================================================================
+Building a docker Image :
+
+- Every line in docker file is called a layer
+- while doing docker build , every layer is stacked and then a complete image is built at the end
+- docker history <image-name> ----- can be used to see the information behind each layer while it was Building
+- if any layer fails during the build , all previous layers are stored in the cache and then while rebuilding , docker takes info from cache rather than completely restarting it.
+
+- What can you containerise : DB's , OS's , Browsers , Utilities
+
+Build Command : docker build DockerFile -t <image_name:image_tag>
+
+To set env variables :
+- docker run -e APP_COLOR=blue simple-webapp-color
+- you can run docker inspect command on already running container to know the list of env variables set for that container
+
+- docker run -p 38282:8080 -e APP_COLOR=blue --name <container_name> <image_name>
+1. Port mapping
+2. Running with an env variables
+3. container name as blue-app
+4. the image always should be coming at the end
+
+=========================================================================
+In Docker, both CMD and ENTRYPOINT are used to define commands that run when a container starts, but ENTRYPOINT is non-overridable, while CMD can be overridden at runtime
+
+
+
