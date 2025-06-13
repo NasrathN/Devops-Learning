@@ -1,1 +1,32 @@
+> Kubernetes Architecture :
+- Node : Machine (physical or virtual) on which kubernetes is installed . Called worker machine.
+- Cluster : Set of nodes . If one node fails , another node can keep the application running . Multiple nodes help in sharing the workload.
+- Managing the cluster : Master node - Another node with kuberntes installed in it and configured as Master . It watches over other nodes & Responsible for actual orchestration .
+
+> Components installed as part of Kubernetes installation :
+- API server : acts as front end server . All communication to kubernetes happens through this .
+- etcd : key-value store that helps in managing all data related to cluster.
+- kubelet : agent running on every node . Makes sure container is running on the nodes as expected .
+- container run time : underlying software that is used to run containers
+- controller : brian behind orchestration
+- scheduler : responsible for distributing work across different nodes.
+
+> Master node : has kube-api-server . That is what makes it as master . It also has etcd , controller , scheduler
+> Worker node : has kubelet agent which communicates with master + container runtime
+
+> Different kubectl commands :
+- kubectl run nginx
+- kubectl cluster-info
+- kubectl get nodes
+- kubectl get pods
+
+> Pod : single instance of an application . Smallest object that you can create in Kubernetes .
+- Pods have 1:1 relationship with containers that it is running
+- To scale up : create new pods . You do not add additional containers to existing pod . Instead you create new pod with new instance of your app
+- To scale down : delete existing pods
+- Pods can have multiple containers but not of same kind.
+- Command used : kubectl run nginx --image nginx ---> It creates a pod and deploys the nginx image as container
+- List of pods : kubectl get pods
+
+
 
