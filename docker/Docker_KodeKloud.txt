@@ -59,5 +59,9 @@ To set env variables :
 =========================================================================
 In Docker, both CMD and ENTRYPOINT are used to define commands that run when a container starts, but ENTRYPOINT is non-overridable, while CMD can be overridden at runtime
 
+=======================================================================
+Volume Mounting : Even if the container crashes , the data will be safe
 
+docker run –v /data/mysql:/var/lib/mysql mysql
 
+=========================================================================
