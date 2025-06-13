@@ -77,8 +77,14 @@ Command for replica sets :
 > kubectl scale -replicas=6 -f rc-definition.yml
 
 --------------------------------------------------------
+> Deployment :
+- Handles replica managmement , updates , rolling updates
+- yaml file is same as replica sets except kind 
+- Replicas = how many instances of your app you want.
+- Deployment = the tool that manages those replicas and handles upgrades safely
 
-
+----------------------------------------------------------
+- Services :
 
 
 
