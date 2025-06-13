@@ -19,6 +19,7 @@
 - kubectl cluster-info
 - kubectl get nodes
 - kubectl get pods
+- kubectl describe pod nginx
 
 > Pod : single instance of an application . Smallest object that you can create in Kubernetes .
 - Pods have 1:1 relationship with containers that it is running
@@ -27,6 +28,58 @@
 - Pods can have multiple containers but not of same kind.
 - Command used : kubectl run nginx --image nginx ---> It creates a pod and deploys the nginx image as container
 - List of pods : kubectl get pods
+
+======================================PRDS (Pod , ReplicaSet , Deployment , Service)
+> Pods with YAML : (akms)
+apiVersion : v1 <Version of Kubernetes API>
+kind: Pod
+metadata : <only name and labels is accepted here>
+  name: my-pod-app <name of the pod>
+  labels:
+    app :
+    type :
+spec:
+  containers: < this is of data type array or list>
+  - name : nginx-container <hypen here mentions about first element in the list> 
+    image : nginx <name_of_docker_image>
+
+Command : kubectl create -f pod-definition.yml
+
+-------------------------------------------------------
+> Replication Controllers and Replica Sets :
+- Replica Sets is the new recommended way to set up replicas . Replication controller was old implementtaion.
+
+apiVersion : apps/v1
+kind: ReplicaSet
+metadata : <only name and labels is accepted here>
+  name: my-app-rc
+  labels:
+    app : my-app
+    type : front-end
+spec:
+  template
+      metadata : <only name and labels is accepted here>
+        name: my-pod-app <name of the pod>
+        labels:
+          app :
+          type :
+      spec:
+          containers: < this is of data type array or list>
+            - name : nginx-container <hypen here mentions about first element in the list> 
+              image : nginx <name_of_docker_image>
+  replicas : 3
+
+Command for replica sets :
+> kubectl create -f rc-definition.yml
+> kubectl get replicaset
+> kubectl delete replicaset myapp-replicaset
+> kubectl replace -f rc-definition.yml
+> kubectl scale -replicas=6 -f rc-definition.yml
+
+--------------------------------------------------------
+
+
+
 
 
 
