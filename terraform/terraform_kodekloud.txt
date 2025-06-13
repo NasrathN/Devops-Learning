@@ -1,1 +1,232 @@
+> Traditional IT methods used a lot of different ways to provision different infrastructure and turn around time was quite high.
+> To address this , many organisation internally started developing scripts to automate provision
+> Different types of IaC tools :
+- Configuration Management : Ansible , Puppet , SALTSTACK
+- Server Templating : docker , Hashicorp Packer , Hashicorp Vagrant
+- Provisioning Tools : Hashicorp Terraform , Cloudformation
 
+> Configuration Management :
+- Designed to install and mange software on existing infra resources such as servers , databases , networking devices
+- Idempotent : You can run the code multiple times and every time you run , it will make only the necessary changes to bring the env to defined state so that we dont
+have to do anything explicitly.
+
+> Server Templating :
+- creates server images . All softwares will already be there in the image.
+- provides immutable infra unlike configuration management .
+
+> Provisioning Tools:
+- These tools are used for provisoning infra components using a simple declarative code.
+- These infra componnets are servers , Databases , VPC's , subnets , security groups , storage .
+- CloudFormation - specific to AWS resources.
+- Terraform - Vendor agnostic
+
+
+> Terraform :
+- Free and open source + Developed by Hashicorp.
+- Providers : enable terraform to manage diff cloud platforms
+- It supports hundred of providers like - MySQL , MongoDB , Postgres , Git, Grafana , DNS , Cloudflare...etc etc.
+- It uses HCL - Hashicorp configuration Language (simple declarative language) to define infrastructure resources.
+- Declarative code - means going to desired state from the real state of that resources .Terraform internally takes care of this , we dont have to do anything.
+- How does TF achieves this ? - TF works in 3 stages - init , plan , apply
+
+> Init Phase :
+- initialises the project
+- identifies the resources to be used for the target state.
+
+> Plan Phase :
+- Drafts a plan to get to the target state.
+
+> Apply phase :
+- TF makes the necessary changes
+
+> TF records the state of the infrastructure as it is seen in real time and then based on that it determines what action should be taken to update resources
+> Everything that TF tries to provision/chnage/destroy is termed as resource.
+
+
+========================
+HCL - Hashicorp Configuration Language 
+
+> Everything is designed in the form of blocks
+> in resource_type : name before underscore is called as provider . At this point TF gets to know which provider to use.
+
+Ex: local.tf
+resource "<resource_type>" "<resource_name>"{
+    key1 = value1
+    key2 = value2
+}
+
+> file names end with .tf extension
+> block has arguments of key, value pair
+
+Ex: To provision EC2 instance 
+
+resource "aws_instance" "webserver"{
+   ami = "ami_23800"
+   instance_type = "t2.micro"
+}
+
+> After creating the config file , run below commands sequentially  :
+terraform init
+terraform plan (this is optional , it just shows the diff steps that tf has planned to apply)
+terraform apply
+
+terraform show (inspects state files and displays resource details)
+terrform destroy (another command to destroy resources)
+
+If you update config file - u can run terraform plan to see the changes and then terraform apply
+==============================================
+
+> During terraform init command - all plugins related to the provider given in config file is downloaded and kept in a hidden folder (.terraform/providers)
+> main.tf can be created to hold multiple resource blocks
+
+> instead of hardcoding argument values in blocks , we can create variables.tf and put values in it so that it can be changed later without actually changing main.tf
+
+Ex :
+variable "filename" {
+    default = "hello.txt"
+    type = string
+    description = "new file"
+}
+
+type can hold any data type - string , number , bool , list , tuple , dictionary 
+
+Ex : To use variables in main.tf
+
+resource "local_file" "pet-name"{
+    filename = var.filename
+}
+
+> Variables can also be passed from command line while doing terraform apply . This will take highest precedence over variables mentioned in variables.tf
+> Other files that can have variables will have extension - .tfvars . We can directly perform terraform apply filevar.tfvars
+> Environment variables can be used as TF_VAR_<variable_name> = "value"
+
+> Passing references : 
+Ex:
+
+resource "local_file" "file1"{
+    filename = "file1.txt"
+    content = "${<resource_type>.<resource_name>.<argument_key>}
+}
+
+> Explicit reference passing :
+resource "local_file" "pet-name"{
+    filename = var.filename
+    depends_on = [<resource_type>.<resource_name>]
+}
+
+============================================================
+> Output Variable :
+
+- terraform output (command to show output variables)
+
+- Ex: See the way values has been referred and syntax of output block that is declared
+
+output "pet-name"{
+    value = local_file.file1.filename
+}
+
+=============================================================
+> Concepts learnt till networking
+- how to define config file
+- provider , terraform providers : plugins downloaded during terraform init
+- HCL : Hashicorp configuration language - declarative in nature
+- resource_type , resource_name , block
+- terraform state (terraform.tfstate json created during terraform apply)
+- terraform commands - init , plan , apply , show , output
+- passing input variables - variables.tf or terraform.tfvars or through command line
+- reference passing = implicit passing : "${<type>.<name>.<arg>}" or explicit passing : depends_on
+- storing output variables - output.tf
+
+=============================================================
+> Terraform state :
+- has lot of sensitive info on state of resource and data on it
+- instead of storing in git , store in backend systems like s3 or cloud storage
+- state file should never me edited manually . All should go via commands
+
+================================================================
+> More set of Terraform commands :
+
+- terraform validate : to check if the config file created is valid with all correct syntax
+- terraform fmt : format the config file into proper canonical form 
+- terraform show -json : to show the output in json format
+- terraform providers : to see list of all providers given in config file
+- terraform apply -refresh-only : If any resource was updated manually , and we want to update just teh state file , this comand can be used. It will not update any infrastructure.
+
+=================================================================
+> Mutable vs Immutable infrastructure :
+
+- mutable infrastructure : in-place updates of resources + can lead to configuration drift (means few servers at one particular deoendency and other servers on other set of 
+dependencies)
+- immutable infrastructure : rather than upgrading , we bring in new resources with correct upgrades
+
+> In TF - resources are destroyed first and then new resources are created .
+> What if we want the resources to be created first and then destroy old resources . Or what if we dont want any resources to be created at all ?
+
+> Above conditions can be achieved using lifecycle rules :
+
+resource "local_file" "my_file"{
+    filename = "/root/new_file.txt"
+    content = "We love pets!"
+
+    lifecycle {
+        create_before_destroy = true --- > It means that TF will create the resource first and then destroy
+    }
+}
+
+> Other such lifecycle rules are :
+- create_before_destroy 
+- prevent_destroy
+- ignore_changes = [mention any resource attribute]
+- ignore_changes = all
+
+==================================================================
+> Difference between resource and data :
+
+- Resource :
+1. Keyword : resource
+2. Creates , Updates , Destroys Infrastructure
+3. Also called managed resources
+
+- Data Source:
+1. Keyword : data
+2. Only reads infrastructure
+3. Also called Data resources
+
+Ex: of using data source:
+
+output "os-version" {
+  value = data.local_file.os.content
+}
+data "local_file" "os" {
+  filename = "/etc/os-release"
+}
+
+=================================================================
+> Concept of Looping in Terraform:
+
+resource "local_sensitive_file" "name" {
+    filename = var.users[count.index]
+    content = var.content
+    count = length(var.users)
+
+}
+
+=================================================================
+> To mention version of different providers:
+
+terraform {
+  required_providers {
+    k8s = {
+      source  = "hashicorp/kubernetes"
+      version = "> 1.12.0, != 1.13.1, < 1.13.3 "
+    }
+
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 1.2.0"
+    }
+  }
+}
+===================================================
+
+> AWS-Services provisioning using Terraform :
